@@ -19,13 +19,13 @@
       }
     ],
     "chatParticipants": [
-    {
+      {
         "id": "json-linqer-v0.1",
         "fullName": "json-linqer",
         "name": "linqer",
         "description": "What can I teach you?",
         "isSticky": true
-    }
+      }
     ]
   },
   "scripts": {
