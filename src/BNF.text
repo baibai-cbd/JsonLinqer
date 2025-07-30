@@ -1,0 +1,7 @@
+// BNF definitions
+// 
+// number ::= NUMBER
+// arith_factor ::= NUMBER | LPAREN arith_expression RPAREN | [ADDMINUS] arith_factor
+// arith_term ::= arith_factor { MULDIV arith_factor }
+// arith_expression ::= arith_term { ADDMINUS arith_term }
+// expression ::= arith_expression

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { lexer } from './lexer';
+import { Parser } from './parser';
 
 // define a chat handler
 export const handler: vscode.ChatRequestHandler = async (
@@ -15,7 +16,9 @@ export const handler: vscode.ChatRequestHandler = async (
 
   const tokens = lexer(request.prompt);
   console.log(tokens);
-
+  let parser = new Parser(tokens);
+  let ast = parser.parse();
+  console.log(JSON.stringify(ast, null, 2));
   // initialize the messages array with the prompt
   //const messages = [vscode.LanguageModelChatMessage.User(prompt)];
   if (request.references.length === 0)

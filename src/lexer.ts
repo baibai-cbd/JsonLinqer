@@ -1,18 +1,24 @@
-type TokenType = 'number' | 'string' | 'identifier' | 'keyword' | 'whitespace' | 'operator' | 'punctuation';
+export type TokenType = 'NUMBER' | 'STRING' | 'IDENTIFIER' | 'KEYWORD' | 
+                 'WHITESPACE' | 'OPERATOR' | 'PUNCTUATION' | 'LPAREN' |
+                 'RPAREN' | 'MULDIV' | 'ADDMINUS' | 'EOF';
 
-type Token = {
+export type Token = {
     type: TokenType;
-    value: string;
+    value?: string;
 }
 
 const lexerRules: { type: TokenType; regex: RegExp }[] = [
-    { type: 'whitespace', regex: /^\s+/ },
-    { type: 'number', regex: /^[0-9]+/ },
-    { type: 'string', regex: /^"[^"]*"/ },
-    { type: 'identifier', regex: /^[a-zA-Z_][a-zA-Z0-9_]*/ },
-    { type: 'keyword', regex: /^(this|true|false|null)/ },
-    { type: 'operator', regex: /^(=>|\+|-|\*|\/|=|==|!=|<|>|<=|>=|&&|\|\||!)/ },
-    { type: 'punctuation', regex: /^({|}|,|:|\[|\]|\.|\(|\))/ }
+    { type: 'WHITESPACE', regex: /^\s+/ },
+    { type: 'NUMBER', regex: /^[0-9]+/ },
+    { type: 'STRING', regex: /^"[^"]*"/ },
+    { type: 'IDENTIFIER', regex: /^[a-zA-Z_][a-zA-Z0-9_]*/ },
+    { type: 'KEYWORD', regex: /^(this|true|false|null)/ },
+    { type: 'OPERATOR', regex: /^(=>|=|==|!=|<|>|<=|>=|&&|\|\||!)/ },
+    { type: 'PUNCTUATION', regex: /^({|}|,|:|\[|\]|\.)/ },
+    { type: 'LPAREN', regex: /^\(/ },
+    { type: 'RPAREN', regex: /^\)/ },
+    { type: 'MULDIV', regex: /^(\*|\/)/ },
+    { type: 'ADDMINUS', regex: /^(\+|\-)/ }
 ];
 
 export const lexer = (input: string): Token[] => {
@@ -26,7 +32,7 @@ export const lexer = (input: string): Token[] => {
         for (const rule of lexerRules) {
             match = input.slice(index).match(rule.regex);
             if (match) {
-                if (rule.type !== 'whitespace') { // Ignore whitespace tokens
+                if (rule.type !== 'WHITESPACE') { // Ignore whitespace tokens
                     tokens.push({ type: rule.type, value: match[0] });
                 }
                 index += match[0].length;
@@ -40,5 +46,7 @@ export const lexer = (input: string): Token[] => {
         }
     }
     
+    // Add EOF token at the end
+    tokens.push({ type: 'EOF' });
     return tokens;
 };
