@@ -1,6 +1,6 @@
-export type TokenType = 'NUMBER' | 'STRING' | 'IDENTIFIER' | 'KEYWORD' | 
+export type TokenType = 'NUMBER' | 'STRING' | 'IDENTIFIER' | 'VALUEKEYWORD' | 
                  'WHITESPACE' | 'OPERATOR' | 'PUNCTUATION' | 'LPAREN' |
-                 'RPAREN' | 'MULDIV' | 'ADDMINUS' | 'EOF';
+                 'RPAREN' | 'MULDIV' | 'ADDMINUS' | 'EOF' | 'THIS' | 'DOT';
 
 export type Token = {
     type: TokenType;
@@ -11,10 +11,12 @@ const lexerRules: { type: TokenType; regex: RegExp }[] = [
     { type: 'WHITESPACE', regex: /^\s+/ },
     { type: 'NUMBER', regex: /^[0-9]+/ },
     { type: 'STRING', regex: /^"[^"]*"/ },
+    { type: 'THIS', regex: /^this/ },
+    { type: 'VALUEKEYWORD', regex: /^(true|false|null)/ },
     { type: 'IDENTIFIER', regex: /^[a-zA-Z_][a-zA-Z0-9_]*/ },
-    { type: 'KEYWORD', regex: /^(this|true|false|null)/ },
+    { type: 'DOT', regex: /^\./ },
     { type: 'OPERATOR', regex: /^(=>|=|==|!=|<|>|<=|>=|&&|\|\||!)/ },
-    { type: 'PUNCTUATION', regex: /^({|}|,|:|\[|\]|\.)/ },
+    { type: 'PUNCTUATION', regex: /^({|}|,|:|\[|\])/ },
     { type: 'LPAREN', regex: /^\(/ },
     { type: 'RPAREN', regex: /^\)/ },
     { type: 'MULDIV', regex: /^(\*|\/)/ },
@@ -42,7 +44,7 @@ export const lexer = (input: string): Token[] => {
 
         if (!match) {
             // If no rule matched, throw an error
-            throw new Error(`Unexpected token at index ${index}: ${input[index]}`);
+            throw new Error(`lexer: unexpected token at index ${index}: ${input[index]}`);
         }
     }
     

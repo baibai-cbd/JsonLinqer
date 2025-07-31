@@ -1,7 +1,32 @@
 // BNF definitions
 // 
-// number ::= NUMBER
-// arith_factor ::= NUMBER | LPAREN arith_expression RPAREN | [ADDMINUS] arith_factor
-// arith_term ::= arith_factor { MULDIV arith_factor }
-// arith_expression ::= arith_term { ADDMINUS arith_term }
-// expression ::= arith_expression
+// arith-factor ::= NUMBER | LPAREN arith-expr RPAREN | [ADDMINUS] arith-factor
+// arith-term ::= arith-factor { MULDIV arith-factor }
+// arith-expr ::= arith-term { ADDMINUS arith-term }
+// 
+
+// linq-expr ::= collection DOT linq-method-name LPAREN lambda-expr RPAREN
+// collection ::= this-expr | linq-expr
+// lambda-expr ::= lambda-parameter "=>" logical-or-expr
+
+logical-or-expr ::= logical-and-expr ("||" logical-and-expr)*
+
+logical-and-expr ::= comparison-expr ("&&" comparison-expr)*
+
+comparison-expr ::= member-access comparison-operator value-expr
+                          | value-expr comparison-operator member-access
+                          | member-access
+                          | "!" member-access
+                          | "(" logical-or-expr ")"
+                          | value-expr
+
+// member-access ::= identifier-expr member-access-tail
+// member-access-tail ::= DOT identifier-expr member-access-tail | empty-expr
+
+// value-expr ::= NUMBER | STRING | VALUEKEYWORD
+// comparison-operator ::= ">" | "<" | ">=" | "<=" | "==" | "!="
+// linq-method-name ::= "Where"
+// lambda-parameter ::= identifier-expr
+// identifier-expr ::= IDENTIFIER
+// this-expr ::= THIS
+// empty-expr ::= ε
