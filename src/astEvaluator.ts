@@ -1,4 +1,4 @@
-import { BinaryExpression, Expression, NumberLiteral, ParenthesizedExpression } from "./astNodes";
+import { BinaryExpression, Expression, NumberLiteral, ParenthesizedExpression } from "./astNodes.js";
 
 interface ASTVisitor {
     visitNumberLiteral(node: NumberLiteral): any;

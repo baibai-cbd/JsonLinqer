@@ -3,6 +3,7 @@
   "displayName": "JsonLINQer",
   "description": "",
   "version": "0.0.1",
+  "type": "module",
   "engines": {
     "vscode": "^1.100.0"
   },
@@ -46,5 +47,8 @@
     "typescript": "^5.8.3",
     "@vscode/test-cli": "^0.0.10",
     "@vscode/test-electron": "^2.5.2"
+  },
+  "dependencies": {
+    "linq": "^4.0.3"
   }
 }

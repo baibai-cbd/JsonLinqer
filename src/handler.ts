@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
-import { lexer } from './lexer';
-import { Parser } from './parser';
+import { lexer } from './lexer.js';
+import { Parser } from './parser.js';
+import { testData } from './testWeather.js';
+import { LinqBuilder } from './linqBuilder.js';
 
 // define a chat handler
 export const handler: vscode.ChatRequestHandler = async (
@@ -14,11 +16,16 @@ export const handler: vscode.ChatRequestHandler = async (
   'You are a helpful code tutor. Your job is to teach the user with simple descriptions and sample code of the concept. Respond with a guided overview of the concept in a series of messages. Do not give the user the answer directly, but guide them to find the answer themselves. If the user asks a non-programming question, politely decline to respond.';
   let prompt = BASE_PROMPT;
 
-  const tokens = lexer(request.prompt);
-  console.log(tokens);
-  let parser = new Parser(tokens);
-  let ast = parser.parse();
-  console.log(JSON.stringify(ast, null, 2));
+  // const tokens = lexer(request.prompt);
+  // console.log(tokens);
+  // let parser = new Parser(tokens);
+  // let ast = parser.parse();
+  // console.log(JSON.stringify(ast, null, 2));
+
+  let linqBuilder = new LinqBuilder(testData, "x", "x.temperatureC", ">=", "10");
+  const result = linqBuilder.TryBuildAndExecuteLinqFunction();
+  console.log(result.toArray());
+
   // initialize the messages array with the prompt
   //const messages = [vscode.LanguageModelChatMessage.User(prompt)];
   if (request.references.length === 0)
