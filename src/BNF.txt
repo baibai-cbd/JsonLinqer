@@ -5,9 +5,8 @@
 // arith-expr ::= arith-term { ADDMINUS arith-term }
 // 
 
-// linq-expr ::= collection DOT linq-method-name LPAREN lambda-expr RPAREN
-// collection ::= this-expr | linq-expr
-// lambda-expr ::= lambda-parameter "=>" logical-or-expr
+// linq-expr ::= this-expr ( DOT linq-method-name LPAREN lambda-expr RPAREN )*
+// lambda-expr ::= identifier-expr "=>" logical-or-expr
 
 logical-or-expr ::= logical-and-expr ("||" logical-and-expr)*
 
@@ -26,7 +25,6 @@ comparison-expr ::= member-access comparison-operator value-expr
 // value-expr ::= NUMBER | STRING | VALUEKEYWORD
 // comparison-operator ::= ">" | "<" | ">=" | "<=" | "==" | "!="
 // linq-method-name ::= "Where"
-// lambda-parameter ::= identifier-expr
 // identifier-expr ::= IDENTIFIER
 // this-expr ::= THIS
 // empty-expr ::= ε

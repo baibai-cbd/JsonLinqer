@@ -1,7 +1,6 @@
 import Enumerable from 'linq';
 
 
-
 export class LinqBuilder {
     
     private jsonObject: any;
@@ -49,8 +48,14 @@ export class LinqBuilder {
 
     private memberAccess(element: any, paths: string[]): any {
             let curr = element;
+            if (curr === null || curr === undefined) {
+                return null;
+            }
             for (const p of paths) {
                 curr = curr[p];
+                if (curr === null || curr === undefined) {
+                    return null;
+                }
             }
             return curr;
     };

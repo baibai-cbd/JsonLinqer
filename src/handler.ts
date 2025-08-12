@@ -24,7 +24,17 @@ export const handler: vscode.ChatRequestHandler = async (
 
   let linqBuilder = new LinqBuilder(testData, "x", "x.temperatureC", ">=", "10");
   const result = linqBuilder.TryBuildAndExecuteLinqFunction();
-  console.log(result.toArray());
+  const jsonResponse = result.toArray();
+  console.log(jsonResponse);
+
+  const jsonString = JSON.stringify(jsonResponse, null, 2);
+
+    // Send the formatted JSON response to the chat
+    stream.markdown(`
+\`\`\`json
+${jsonString}
+\`\`\`
+`);
 
   // initialize the messages array with the prompt
   //const messages = [vscode.LanguageModelChatMessage.User(prompt)];
@@ -59,8 +69,8 @@ export const handler: vscode.ChatRequestHandler = async (
 
   // send the request
   //const chatResponse = await request.model.sendRequest(messages, {}, token);
-  stream.markdown("test abc");
-  
+  //stream.markdown("test abc");
+
   // stream the response
   //   for await (const fragment of chatResponse.text) {
   //     stream.markdown(fragment);

@@ -1,0 +1,13 @@
+
+08/01 22:40
+return json as code snippet into chat window --- DONE
+
+build more basic functions in linqBuilder or astEvaluator --- DONE
+(need to consider code structure)
+
+
+08/07 22:51
+add support in lambda-expr for projection expression (select new anonymous type)
+add support for 'new' keyword and anonymous type into lexer
+
+integrate arithmatic expressions into member-access with arithmatics or value-expr with arithmatics 

@@ -1,5 +1,5 @@
 import { Token, TokenType } from './lexer.js';
-import { Expression, NumberLiteral, BinaryExpression, ParenthesizedExpression, LinqExpression, ThisExpression, LambdaExpression, StringLiteral, ValueKeyword, Identifier, EmptyExpression, MemberAccessExpression, UnaryExpression } from './astNodes.js';
+import { Expression, NumberLiteral, BinaryCompareExpression, ParenthesizedExpression, LinqExpression, ThisExpression, LambdaExpression, StringLiteral, ValueKeyword, Identifier, EmptyExpression, MemberAccessExpression, UnaryCompareExpression, BinaryCalcExpression, ValueExpression, BinaryLogicalExpression } from './astNodes.js';
 
 export class Parser {
     private tokens: Token[];
@@ -37,27 +37,32 @@ export class Parser {
 
     // linq-expr ::= collection DOT linq-method-name LPAREN lambda-expr RPAREN
     private linqExpr(): Expression {
-        let collection = this.collectionExpr();
-        this.consume('DOT');
-        let methodName = this.linqMethodName();
-        this.consume('LPAREN');
-        let lambdaExpr = this.lambdaExpr();
-        this.consume('RPAREN');
-        return {
-            type: 'LinqExpression',
-            collection,
-            methodName,
-            lambdaExpr
-        } as LinqExpression;
+        let collection: ThisExpression | LinqExpression = this.thisExpr();
+        
+        while (this.currentToken.type === 'DOT') {
+            this.consume('DOT');
+            const methodName = this.linqMethodName();
+            this.consume('LPAREN');
+            const lambdaExpr = this.lambdaExpr();
+            this.consume('RPAREN');
+            collection = {
+                type: 'LinqExpression',
+                collection: collection,
+                methodName,
+                lambdaExpr
+            } as LinqExpression;
+        }
+        
+        return collection;
     }
 
-    // collection ::= this-expr | linq-expr
-    private collectionExpr(): Expression {
+    // this-expr ::= THIS
+    private thisExpr(): ThisExpression {
         if (this.currentToken.type === 'THIS') {
             this.consume('THIS');
             return { type: 'ThisExpression'} as ThisExpression;
         } else {
-            return this.linqExpr();
+            throw new Error(`parser: expected 'this', found: ${this.currentToken.type}`);
         }
     }
 
@@ -73,7 +78,7 @@ export class Parser {
         }
     }
 
-    private lambdaExpr(): Expression {
+    private lambdaExpr(): LambdaExpression {
         if (this.currentToken.type === 'IDENTIFIER') {
             const paramName = this.currentToken.value!;
             this.consume('IDENTIFIER');
@@ -90,36 +95,46 @@ export class Parser {
     }
 
     // logical-or-expr ::= logical-and-expr ("||" logical-and-expr)*
-    private logicalOrExpr(): Expression {
-        let node = this.logicalAndExpr();
+    private logicalOrExpr(): BinaryLogicalExpression {
+        let node = {
+                type: 'BinaryLogicalExpression',
+                operator: '&&',
+                left: this.logicalAndExpr(),
+                right: { type: 'ValueKeyword', value: true } as ValueKeyword
+            } as BinaryLogicalExpression;
         
         while (this.currentToken.type === 'OPERATOR' && this.currentToken.value === '||') {
             const operator = this.currentToken.value;
             this.consume('OPERATOR', '||');
             node = {
-                type: 'BinaryExpression',
+                type: 'BinaryLogicalExpression',
                 operator,
                 left: node,
                 right: this.logicalAndExpr()
-            } as BinaryExpression;
+            } as BinaryLogicalExpression;
         }
         
         return node;
     }
 
     // logical-and-expr ::= comparison-expr ("&&" comparison-expr)*
-    private logicalAndExpr(): Expression {
-        let node = this.comparisonExpr();
+    private logicalAndExpr(): BinaryLogicalExpression {
+        let node = {
+                type: 'BinaryLogicalExpression',
+                operator: '&&',
+                left: this.comparisonExpr(),
+                right: { type: 'ValueKeyword', value: true } as ValueKeyword
+            } as BinaryLogicalExpression;
         
         while (this.currentToken.type === 'OPERATOR' && this.currentToken.value === '&&') {
             const operator = this.currentToken.value;
             this.consume('OPERATOR', '&&');
             node = {
-                type: 'BinaryExpression',
+                type: 'BinaryLogicalExpression',
                 operator,
                 left: node,
                 right: this.comparisonExpr()
-            } as BinaryExpression;
+            } as BinaryLogicalExpression;
         }
         
         return node;
@@ -131,7 +146,7 @@ export class Parser {
     //                       | "(" logical-or-expr ")"
     //                       | value-expr
     // TODO for this rule    | "!" member-access
-    private comparisonExpr(): Expression {
+    private comparisonExpr(): MemberAccessExpression | ValueExpression | BinaryCompareExpression | UnaryCompareExpression | BinaryLogicalExpression {
         let first: Expression;
         
         if (this.currentToken.type === 'IDENTIFIER') {
@@ -141,11 +156,11 @@ export class Parser {
                 this.consume('OPERATOR');
                 const second = this.valueExpr();
                 return {
-                    type: 'BinaryExpression',
+                    type: 'BinaryCompareExpression',
                     operator,
                     left: first,
                     right: second
-                } as BinaryExpression;
+                } as BinaryCompareExpression;
             } else {
                 return first; // Just a member access without comparison
             }
@@ -156,11 +171,11 @@ export class Parser {
                 this.consume('OPERATOR');
                 const second = this.memberAccess();
                 return {
-                    type: 'BinaryExpression',
+                    type: 'BinaryCompareExpression',
                     operator,
                     left: first,
                     right: second
-                } as BinaryExpression;
+                } as BinaryCompareExpression;
             } else {
                 return first; // Just a value expression without comparison
             }
@@ -168,10 +183,16 @@ export class Parser {
             this.consume('LPAREN');
             first = this.logicalOrExpr();
             this.consume('RPAREN');
+            return first;
+        } else if (this.currentToken.type === 'OPERATOR' && this.currentToken.value === '!') {
+            const operator = this.currentToken.value;
+            this.consume('OPERATOR', '!');
+            const operand = this.memberAccess();
             return {
-                type: 'UnaryExpression',
-                operand: first
-            } as UnaryExpression;
+                type: 'UnaryCompareExpression',
+                operator,
+                operand
+            } as UnaryCompareExpression;
         } else {
             throw new Error(`parser: unexpected token in comparison expression: ${this.currentToken.type}`);
         }
@@ -179,11 +200,14 @@ export class Parser {
 
     // member-access ::= identifier-expr member-access-tail
     // member-access-tail ::= DOT identifier-expr member-access-tail | empty-expr
-    private memberAccess(): Expression {
+    private memberAccess(): MemberAccessExpression {
         let node = this.identifierExpr();
         const tail = this.memberAccessTail();
         if (tail.type === 'EmptyExpression') {
-            return node; // No member access tail, just return the identifier
+            return {
+                type: 'MemberAccessExpression',
+                identifier: node
+            } as MemberAccessExpression;
         } else {
             return {
                 type: 'MemberAccessExpression',
@@ -193,7 +217,7 @@ export class Parser {
         }
     }
 
-    private memberAccessTail(): Expression {
+    private memberAccessTail(): MemberAccessExpression | EmptyExpression {
         if (this.currentToken.type === 'DOT') {
             this.consume('DOT');
             const identifier = this.identifierExpr();
@@ -208,7 +232,7 @@ export class Parser {
         }
     }
 
-    private valueExpr(): Expression {
+    private valueExpr(): ValueExpression {
         if (this.currentToken.type === 'NUMBER') {
             const value = parseFloat(this.currentToken.value!);
             this.consume('NUMBER');
@@ -257,11 +281,11 @@ export class Parser {
             this.consume(this.currentToken.type);
             
             node = {
-                type: 'BinaryExpression',
+                type: 'BinaryCalcExpression',
                 operator,
                 left: node,
                 right: this.arithTerm()
-            } as BinaryExpression;
+            } as BinaryCalcExpression;
         }
         
         return node;
@@ -275,11 +299,11 @@ export class Parser {
             this.consume(this.currentToken.type);
             
             node = {
-                type: 'BinaryExpression',
+                type: 'BinaryCalcExpression',
                 operator,
                 left: node,
                 right: this.arithFactor()
-            } as BinaryExpression;
+            } as BinaryCalcExpression;
         }
         
         return node;

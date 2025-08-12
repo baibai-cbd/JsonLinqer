@@ -32,9 +32,16 @@ export interface ThisExpression extends ASTNode {
 
 export interface LinqExpression extends ASTNode {
     type: 'LinqExpression';
-    collection: Expression;
+    collection: ThisExpression | LinqExpression;
     methodName: string;
     lambdaExpr: LambdaExpression;
+}
+
+// this LambdaExpression only supports single parameter
+export interface LambdaExpression extends ASTNode {
+    type: 'LambdaExpression';
+    parameter: Identifier;
+    body: BinaryLogicalExpression; // TODO: expand to other expressions
 }
 
 export interface MemberAccessExpression extends ASTNode {
@@ -48,20 +55,34 @@ export interface MemberAccessExpression extends ASTNode {
 
 
 
-
-
-
-
-
-
-export interface UnaryExpression extends ASTNode {
-    type: 'UnaryExpression';
-    operator?: string;
+export interface UnaryCompareExpression extends ASTNode {
+    type: 'UnaryCompareExpression';
+    operator: string;
     operand: Expression;
 }
 
-export interface BinaryExpression extends ASTNode {
-    type: 'BinaryExpression';
+export interface UnaryCalcExpression extends ASTNode {
+    type: 'UnaryCalcExpression';
+    operator: string;
+    operand: Expression;
+}
+
+export interface BinaryLogicalExpression extends ASTNode {
+    type: 'BinaryLogicalExpression';
+    operator: '&&' | '||';
+    left: BinaryLogicalExpression | MemberAccessExpression | ValueExpression | BinaryCompareExpression | UnaryCompareExpression;
+    right: BinaryLogicalExpression | MemberAccessExpression | ValueExpression | BinaryCompareExpression | UnaryCompareExpression;
+}
+
+export interface BinaryCompareExpression extends ASTNode {
+    type: 'BinaryCompareExpression';
+    operator: '==' | '!=' | '<' | '>' | '<=' | '>=';
+    left: BinaryCompareExpression | MemberAccessExpression | Identifier | ValueExpression;
+    right: BinaryCompareExpression | MemberAccessExpression | Identifier | ValueExpression;
+}
+
+export interface BinaryCalcExpression extends ASTNode {
+    type: 'BinaryCalcExpression';
     operator: string;
     left: Expression;
     right: Expression;
@@ -72,15 +93,13 @@ export interface ParenthesizedExpression extends ASTNode {
     expression: Expression;
 }
 
-// this LambdaExpression only supports single parameter
-export interface LambdaExpression extends ASTNode {
-    type: 'LambdaExpression';
-    parameter: Expression;
-    body: Expression;
-}
+export type ValueExpression = NumberLiteral | StringLiteral | ValueKeyword;
 
-export type Expression = EmptyExpression |NumberLiteral | StringLiteral | 
-    UnaryExpression | BinaryExpression | 
+export type Expression = 
+    EmptyExpression | 
+    ValueExpression |
+    UnaryCompareExpression | UnaryCalcExpression |
+    BinaryCompareExpression | BinaryCalcExpression | BinaryLogicalExpression |
     ParenthesizedExpression | LambdaExpression |
-    Identifier | LinqExpression | ThisExpression | ValueKeyword |
+    Identifier | LinqExpression | ThisExpression |
     MemberAccessExpression ;
