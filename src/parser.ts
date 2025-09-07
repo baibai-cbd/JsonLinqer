@@ -1,5 +1,5 @@
-import { Token, TokenType } from './lexer.js';
-import { Expression, NumberLiteral, BinaryCompareExpression, ParenthesizedExpression, LinqExpression, ThisExpression, LambdaExpression, StringLiteral, ValueKeyword, Identifier, EmptyExpression, MemberAccessExpression, UnaryCompareExpression, BinaryCalcExpression, ValueExpression, BinaryLogicalExpression } from './astNodes.js';
+import { Token, TokenType } from './lexer';
+import { Expression, NumberLiteral, BinaryCompareExpression, ParenthesizedExpression, LinqExpression, ThisExpression, LambdaExpression, StringLiteral, ValueKeyword, Identifier, EmptyExpression, MemberAccessExpression, UnaryCompareExpression, BinaryCalcExpression, ValueExpression, BinaryLogicalExpression } from './astNodes';
 
 export class Parser {
     private tokens: Token[];

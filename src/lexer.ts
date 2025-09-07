@@ -15,7 +15,9 @@ const lexerRules: { type: TokenType; regex: RegExp }[] = [
     { type: 'VALUEKEYWORD', regex: /^(true|false|null)/ },
     { type: 'IDENTIFIER', regex: /^[a-zA-Z_][a-zA-Z0-9_]*/ },
     { type: 'DOT', regex: /^\./ },
-    { type: 'OPERATOR', regex: /^(=>|=|==|!=|<|>|<=|>=|&&|\|\||!)/ },
+    // multi-char operators first
+    { type: 'OPERATOR', regex: /^(=>|==|!=|<=|>=|&&|\|\|)/ }, // the last one is || escaped
+    { type: 'OPERATOR', regex: /^(=|<|>|!)/ },
     { type: 'PUNCTUATION', regex: /^({|}|,|:|\[|\])/ },
     { type: 'LPAREN', regex: /^\(/ },
     { type: 'RPAREN', regex: /^\)/ },

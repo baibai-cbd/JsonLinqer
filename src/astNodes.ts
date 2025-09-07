@@ -47,7 +47,7 @@ export interface LambdaExpression extends ASTNode {
 export interface MemberAccessExpression extends ASTNode {
     type: 'MemberAccessExpression';
     identifier: Identifier;
-    tail?: MemberAccessExpression; // for chaining member access
+    tail?: MemberAccessExpression | EmptyExpression; // for chaining member access
 }
 
 

@@ -1,5 +1,5 @@
 import Enumerable from "linq";
-import { BinaryCompareExpression, BinaryLogicalExpression, Expression, LambdaExpression, LinqExpression, MemberAccessExpression, NumberLiteral, ParenthesizedExpression, StringLiteral, UnaryCompareExpression, ValueExpression, ValueKeyword } from "./astNodes.js";
+import { BinaryCompareExpression, BinaryLogicalExpression, Expression, LambdaExpression, LinqExpression, MemberAccessExpression, NumberLiteral, ParenthesizedExpression, StringLiteral, UnaryCompareExpression, ValueExpression, ValueKeyword } from "./astNodes";
 
 interface ASTVisitor {
     visitLinqExpression(node: Expression): any;
@@ -10,7 +10,7 @@ interface ASTVisitor {
     visitValueKeyword(node: ValueKeyword): boolean | null;
 }
 
-class ASTEvaluator implements ASTVisitor {
+export class ASTEvaluator implements ASTVisitor {
 
     private dataContext: Map<string, any> = new Map();
     private lambdaParamStack: string[] = [];
@@ -146,11 +146,11 @@ class ASTEvaluator implements ASTVisitor {
         const wrappedFunction = (element: any, index: number): boolean => bodyFunction(element);
         return (array: Enumerable.IEnumerable<any>): Enumerable.IEnumerable<any> => {
             return array.where(wrappedFunction);
-        }
+        };
     }
 
     private traverseMemberAccessExpression(node: MemberAccessExpression): string[] {
-        if (node.tail === undefined) {
+        if (node.tail === undefined || node.tail.type === 'EmptyExpression') {
             return [node.identifier.name];
         } else {
             return [node.identifier.name, ...this.traverseMemberAccessExpression(node.tail)];
@@ -165,7 +165,7 @@ class ASTEvaluator implements ASTVisitor {
             if (paths.length === 1) {
                 return curr;
             }
-            for (const p of paths) {
+            for (const p of paths.slice(1)) {
                 curr = curr[p];
                 if (curr === null || curr === undefined) {
                     return null;
@@ -193,7 +193,6 @@ class ASTEvaluator implements ASTVisitor {
         }
     }
 }
-
 export const evaluateAST = (ast: Expression, data: Map<string, any>): any => {
     const evaluator = new ASTEvaluator();
     

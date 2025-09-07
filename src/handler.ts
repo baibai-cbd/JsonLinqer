@@ -1,8 +1,10 @@
 import * as vscode from 'vscode';
-import { lexer } from './lexer.js';
-import { Parser } from './parser.js';
-import { testData } from './testWeather.js';
-import { LinqBuilder } from './linqBuilder.js';
+import { lexer } from './lexer';
+import { Parser } from './parser';
+import { testData } from './test/suite/testWeather';
+import { LinqBuilder } from './linqBuilder';
+import { ASTEvaluator } from './astEvaluator';
+import { jsonLinqProcessor } from './jsonLinqProcessor';
 
 // define a chat handler
 export const handler: vscode.ChatRequestHandler = async (
@@ -22,19 +24,22 @@ export const handler: vscode.ChatRequestHandler = async (
   // let ast = parser.parse();
   // console.log(JSON.stringify(ast, null, 2));
 
-  let linqBuilder = new LinqBuilder(testData, "x", "x.temperatureC", ">=", "10");
-  const result = linqBuilder.TryBuildAndExecuteLinqFunction();
-  const jsonResponse = result.toArray();
-  console.log(jsonResponse);
+  const prompt2 = 'this.Where(x => x.temperatureC >= 10)';
+  const result = jsonLinqProcessor(prompt2, testData);
 
-  const jsonString = JSON.stringify(jsonResponse, null, 2);
+//   let linqBuilder = new LinqBuilder(testData, "x", "x.temperatureC", ">=", "10");
+//   const result = linqBuilder.TryBuildAndExecuteLinqFunction();
+//   const jsonResponse = result.toArray();
+//   console.log(jsonResponse);
 
-    // Send the formatted JSON response to the chat
-    stream.markdown(`
-\`\`\`json
-${jsonString}
-\`\`\`
-`);
+//   const jsonString = JSON.stringify(jsonResponse, null, 2);
+
+//     // Send the formatted JSON response to the chat
+//     stream.markdown(`
+// \`\`\`json
+// ${jsonString}
+// \`\`\`
+// `);
 
   // initialize the messages array with the prompt
   //const messages = [vscode.LanguageModelChatMessage.User(prompt)];
